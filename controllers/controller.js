@@ -245,7 +245,7 @@ exports.leaderboard = async (req, res, next) => {
         {
           model: Expense,
           attributes: [],
-          required: false, // This will perform a LEFT OUTER JOIN
+          required: false, // This will perform a LEFT OUTER JOINkk
         },
       ],
       group: ["User.id", "User.uname"],
