@@ -39,7 +39,7 @@ router.post(
   controller.update
 );
 
-router.use("/", controller.HomePage);
-// router.use("/", controller.pageNotFound);
+router.get("/", controller.HomePage);
+router.use("/", controller.pageNotFound);
 
 module.exports = router;

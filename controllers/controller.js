@@ -231,16 +231,25 @@ exports.leaderboard = async (req, res, next) => {
   try {
     const result = await User.findAll({
       attributes: [
-        "id",
-        "uname",
+        "uname", // Assuming your User model uses "uname" for the name field
         [
-          Sequelize.fn("SUM", Sequelize.col("Expenses.amount")),
+          Sequelize.fn(
+            "COALESCE",
+            Sequelize.fn("SUM", Sequelize.col("Expenses.amount")),
+            0
+          ),
           "total_expense",
         ],
       ],
-      include: [{ model: Expense, attributes: [] }], // Corrected 'mpdel' to 'model'
+      include: [
+        {
+          model: Expense,
+          attributes: [],
+          required: false, // This will perform a LEFT OUTER JOIN
+        },
+      ],
       group: ["User.id", "User.uname"],
-      order: [[Sequelize.literal("total_expense"), "DESC"]],
+      order: [[Sequelize.literal("total_expense"), "DESC"]], // Order by total_expense descending
     });
     res.json(result);
   } catch (error) {
