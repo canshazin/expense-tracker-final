@@ -18,6 +18,11 @@ router.get(
   controller.get_expenses
 );
 router.get(
+  "/premium/leaderboard",
+  middlewares.authenticate,
+  controller.leaderboard
+);
+router.get(
   "/expense/deleteexpense/:id",
   middlewares.authenticate,
   controller.delete_expense
@@ -34,7 +39,7 @@ router.post(
   controller.update
 );
 
-router.get("/", controller.HomePage);
+router.use("/", controller.HomePage);
 // router.use("/", controller.pageNotFound);
 
 module.exports = router;

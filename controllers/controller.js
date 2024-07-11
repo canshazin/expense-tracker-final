@@ -7,6 +7,8 @@ const jwt = require("jsonwebtoken");
 const paypal = require("@paypal/checkout-server-sdk");
 const qs = require("querystring");
 const axios = require("axios");
+const sequelize = require("../util/database.js");
+const { Sequelize } = require("sequelize");
 
 const environment = new paypal.core.SandboxEnvironment(
   process.env.paypal_id,
@@ -53,7 +55,10 @@ exports.login = async (req, res, next) => {
         if (result === true) {
           response.success = true;
           response.message = "Logged in successfully";
-          response.token = generateAccessToken(exist_email.id);
+          response.token = generateAccessToken(
+            exist_email.id,
+            exist_email.isPrime
+          );
           res.json(response);
         } else if (result === false) {
           response.success = false;
@@ -67,9 +72,21 @@ exports.login = async (req, res, next) => {
   }
 };
 
-function generateAccessToken(id) {
-  return jwt.sign({ user_id: id }, "secretkey");
+function generateAccessToken(id, prime) {
+  return jwt.sign({ user_id: id, prime: prime }, "secretkey");
 }
+// function decodeJWT(token) {
+//   // Split the token into header, payload, and signature
+//   const [headerB64, payloadB64, signature] = token.split('.');
+
+//   // Decode the payload
+//   const payload = JSON.parse(atob(payloadB64.replace(/-/g, '+').replace(/_/g, '/')));
+
+//   // Extract userid and name
+//   const { userid, prime } = payload;
+
+//   return { userid, prime};
+// }
 
 exports.add_expense = async (req, res, next) => {
   try {
@@ -93,10 +110,13 @@ exports.add_expense = async (req, res, next) => {
 
 exports.get_expenses = async (req, res) => {
   try {
-    console.log(req.user);
-    console.log("get expense controller");
+    let prime = false;
+    if (req.user.isPrime == true) {
+      prime = true;
+    }
+
     const expenses = await Expense.findAll({ where: { userId: req.user.id } });
-    res.json(expenses);
+    res.json({ expenses, prime: prime });
   } catch (err) {
     console.log(err);
   }
@@ -177,30 +197,57 @@ exports.update = async (req, res, next) => {
         { isPrime: true },
         { where: { id: req.user.id } }
       );
-      return res.json("payment successful");
+
+      await Promise.all([promise1, promise2]);
+      const token = generateAccessToken(req.user.id, true);
+      return res.json({ msg: "payment successful", token: token });
     } else if (req.body.flag == 2) {
-      const payment_id = req.body.payment_id;
       await Order.update(
         {
           status: "cancelled",
-          payment_id: payment_id,
+          payment_id: req.body.payment_id,
         },
         { where: { userId: req.user.id, order_id: req.body.order_id } }
       );
-      return res.json("payment cancelled");
+      return res.json({ msg: "payment cancelled" });
     } else {
-      const payment_id = req.body.payment_id;
       await Order.update(
         {
           status: "failed",
-          payment_id: payment_id,
+          payment_id: req.body.payment_id,
         },
         { where: { userId: req.user.id, order_id: req.body.order_id } }
       );
-      return res.json("payment failed");
+      return res.json({ msg: "payment failed" });
     }
   } catch (err) {
     console.error(err);
+    return res
+      .status(500)
+      .json({ error: "An error occurred during payment processing" });
+  }
+};
+exports.leaderboard = async (req, res, next) => {
+  try {
+    const result = await User.findAll({
+      attributes: [
+        "id",
+        "uname",
+        [
+          Sequelize.fn("SUM", Sequelize.col("Expenses.amount")),
+          "total_expense",
+        ],
+      ],
+      include: [{ model: Expense, attributes: [] }], // Corrected 'mpdel' to 'model'
+      group: ["User.id", "User.uname"],
+      order: [[Sequelize.literal("total_expense"), "DESC"]],
+    });
+    res.json(result);
+  } catch (error) {
+    console.error("Error in leaderboard:", error);
+    res
+      .status(500)
+      .json({ error: "An error occurred while fetching the leaderboard" });
   }
 };
 

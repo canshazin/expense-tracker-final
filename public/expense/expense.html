@@ -22,10 +22,23 @@
       <input type="text" id="description" name="description" required />
       <button>Add Expense</button>
     </form>
+    <div id="prime_div"></div>
+    <button
+      id="leaderboard_btn"
+      onclick="show_leaderboard(event)"
+      style="visibility: hidden"
+    >
+      Show leaderboard
+    </button>
     <button id="premium_btn" onclick="buy_premium(event)">Buy Premium</button>
-    <div id="warning"></div>
+
+    <!-- <div id="warning"></div> -->
+
     <div id="paypal_button_container"></div>
+    <h3>Expenses :</h3>
     <ul id="expense_list"></ul>
+    <h3 id="leaderboard_heading" style="visibility: hidden">leaderBoard :</h3>
+    <ul id="leaderboard_list"></ul>
   </body>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.5.1/axios.min.js"></script>
   <script src="/expense/expense.js"></script>

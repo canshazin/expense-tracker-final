@@ -39,6 +39,10 @@ function add_to_ui(expense_data, id) {
   const ul = document.querySelector("#expense_list");
   ul.innerHTML += `<li >amount:${expense_data.amount} --- category: ${expense_data.category} --- description: ${expense_data.description}   <button onclick="delete_expense(event,${id})">delete</button></li>`;
 }
+function add_to_ui_leaderboard(expense_data) {
+  const ul = document.querySelector("#leaderboard_list");
+  ul.innerHTML += `<li >Name:  ${expense_data.uname} ------------- Total Expense: ${expense_data.total_expense} `;
+}
 window.addEventListener("DOMContentLoaded", async () => {
   try {
     const expenses = await axios.get(`${url}/expense/getexpenses`, {
@@ -46,7 +50,13 @@ window.addEventListener("DOMContentLoaded", async () => {
         Authorization: localStorage.getItem("token"),
       },
     });
-    expenses.data.forEach((expense) => {
+    console.log(expenses);
+    if (expenses.data.prime == true) {
+      document.querySelector("#premium_btn").style.visibility = "hidden";
+      document.querySelector("#prime_div").innerHTML = "You are a prime user";
+      document.querySelector("#leaderboard_btn").style.visibility = "visible";
+    }
+    expenses.data.expenses.forEach((expense) => {
       add_to_ui(expense, expense.id);
     });
   } catch (err) {
@@ -78,8 +88,9 @@ async function delete_expense(e, id) {
 async function buy_premium(e) {
   try {
     e.preventDefault();
-    const paypal_div = document.querySelector("#paypal_button_container");
-    paypal_div.innerHTML = "";
+    // const paypal_div = document.querySelector("#paypal_button_container");
+    // paypal_div.innerHTML = "";
+    let paymentStatus = "pending";
 
     const response = await axios.get(`${url}/purchase/premium-membership`, {
       headers: { Authorization: localStorage.getItem("token") },
@@ -103,13 +114,17 @@ async function buy_premium(e) {
                 headers: { Authorization: localStorage.getItem("token") },
               }
             );
-            console.log(response.data);
-
+            console.log(response.data.msg);
+            localStorage.setItem("token", response.data.token);
+            paymentStatus = "success";
             setTimeout(() => {
-              alert("Transaction successful ");
+              checkPaymentStatus();
             }, 1000);
+            // Check status after approval
           } catch (err) {
             console.error("Error in onApprove:", err);
+            paymentStatus = "error";
+            checkPaymentStatus(); // Check status after error
           }
         },
         onCancel: async function (data) {
@@ -122,14 +137,12 @@ async function buy_premium(e) {
                 headers: { Authorization: localStorage.getItem("token") },
               }
             );
-
-            alert("Transaction cancelled.");
+            paymentStatus = "cancelled";
+            checkPaymentStatus(); // Check status after cancellation
           } catch (err) {
             console.error("Error in onCancel:", err);
-
-            alert(
-              "An error occurred during the transaction. Please try again."
-            );
+            paymentStatus = "error";
+            checkPaymentStatus(); // Check status after error
           }
         },
         onError: async function (err) {
@@ -143,20 +156,54 @@ async function buy_premium(e) {
               }
             );
             console.log(response.data);
-
-            alert(
-              "An error occurred during the transaction. Please try again."
-            );
+            paymentStatus = "error";
+            checkPaymentStatus(); // Check status after error
           } catch (Err) {
             console.error(Err);
-
-            alert("An unexpected error occurred. Please try again later.");
+            paymentStatus = "error";
+            checkPaymentStatus(); // Check status after error
           }
         },
       })
       .render("#paypal_button_container");
+
+    function checkPaymentStatus() {
+      if (paymentStatus === "success") {
+        document.querySelector("#paypal_button_container").innerHTML = "";
+        alert("Transaction successful! Thank you for your purchase.");
+        document.querySelector("#premium_btn").style.visibility = "hidden";
+        document.querySelector("#prime_div").innerHTML = "You are a prime user";
+        document.querySelector("#leaderboard_btn").style.visibility = "visible";
+        document.querySelector("#leaderboard_heading").style.visibility =
+          "visible";
+      } else if (paymentStatus === "cancelled") {
+        alert("Transaction cancelled.");
+      } else if (paymentStatus === "error") {
+        alert("An error occurred during the transaction. Please try again.");
+      }
+    }
   } catch (err) {
     console.error("Error in buy_premium:", err);
     alert("An error occurred while setting up the payment. Please try again.");
+  }
+}
+async function show_leaderboard(e) {
+  try {
+    e.preventDefault();
+    document.querySelector("#leaderboard_heading").style.visibility = "visible";
+    document.querySelector("#leaderboard_list").innerHTML = "";
+    const response = await axios.get(
+      `${url}/premium/leaderboard`,
+
+      {
+        headers: { Authorization: localStorage.getItem("token") },
+      }
+    );
+    console.log(response.data);
+    response.data.forEach((expense) => {
+      add_to_ui_leaderboard(expense);
+    });
+  } catch (err) {
+    console.log(err);
   }
 }

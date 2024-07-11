@@ -20,7 +20,7 @@ login.addEventListener("submit", async (event) => {
       alert(`${result_data.message}`);
       console.log(result_data.token);
       localStorage.setItem("token", result_data.token);
-      axios.defaults.headers.common["Authorization"] = result_data.token;
+      // axios.defaults.headers.common["Authorization"] = result_data.token;
 
       window.location.href = "../expense/expense.html";
     } else {
