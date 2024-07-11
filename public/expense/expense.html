@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <!-- <link rel="stylesheet" href="login.css" /> -->
+    <script src="https://www.paypal.com/sdk/js?client-id=AWdPOH7_TRxSdeVcjxmhWj6roxAPCiUEJyJLSewJfVlnmHkfMkzcPvgNF3fBrnG1pIoRAblORMNbqnba&currency=USD&intent=capture"></script>
+  </head>
+  <body>
+    <form onsubmit="add_expense(event)">
+      <label for="amount">Expense Amount : </label>
+      <input type="number" id="amount" name="amount" required />
+      <label for="category"> Choose Category : </label>
+      <select id="category" name="category" required>
+        <option value="fuel">Fuel</option>
+        <option value="electricity">Electricity</option>
+        <option value="movie">Movie</option>
+        <option value="food">Food</option>
+      </select>
+      <label for="description"> Description</label>
+      <input type="text" id="description" name="description" required />
+      <button>Add Expense</button>
+    </form>
+    <button id="premium_btn" onclick="buy_premium(event)">Buy Premium</button>
+    <div id="warning"></div>
+    <div id="paypal_button_container"></div>
+    <ul id="expense_list"></ul>
+  </body>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.5.1/axios.min.js"></script>
+  <script src="/expense/expense.js"></script>
+</html>
