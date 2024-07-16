@@ -174,8 +174,7 @@ async function buy_premium(e) {
         document.querySelector("#premium_btn").style.visibility = "hidden";
         document.querySelector("#prime_div").innerHTML = "You are a prime user";
         document.querySelector("#leaderboard_btn").style.visibility = "visible";
-        document.querySelector("#leaderboard_heading").style.visibility =
-          "visible";
+        // document.querySelector("#leaderboard_heading").style.visibility ="visible";
       } else if (paymentStatus === "cancelled") {
         alert("Transaction cancelled.");
       } else if (paymentStatus === "error") {

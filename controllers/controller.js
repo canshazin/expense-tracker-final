@@ -7,8 +7,8 @@ const jwt = require("jsonwebtoken");
 const paypal = require("@paypal/checkout-server-sdk");
 const qs = require("querystring");
 const axios = require("axios");
-const sequelize = require("../util/database.js");
-const { Sequelize } = require("sequelize");
+// const sequelize = require("../util/database.js");
+// const Sequelize = require("sequelize");
 
 const environment = new paypal.core.SandboxEnvironment(
   process.env.paypal_id,
@@ -31,7 +31,7 @@ exports.signup = async (req, res, next) => {
           password: hash,
           isPrime: false,
         });
-        res.json({ success: false, msg: "Signed in successfully" });
+        res.json({ success: true, msg: "Signed in successfully" });
       });
     }
   } catch (err) {
@@ -99,6 +99,10 @@ exports.add_expense = async (req, res, next) => {
       description: expense.description,
       userId: req.user.id,
     });
+    await User.increment("total_expense", {
+      by: expense.amount,
+      where: { id: req.user.id },
+    });
     msg = "expense added succefully";
     const id = expense_added.id;
     const response = { msg, id };
@@ -125,7 +129,13 @@ exports.get_expenses = async (req, res) => {
 exports.delete_expense = async (req, res) => {
   try {
     const id = req.params.id;
-    await Expense.destroy({ where: { id: id, userId: req.user.id } });
+    const expense = await Expense.destroy({
+      where: { id: id, userId: req.user.id },
+    });
+    await User.decrement("total_expense", {
+      by: expense.amount,
+      where: { id: req.user.id },
+    });
     res.json({ success: true });
   } catch (err) {
     console.log(err);
@@ -229,28 +239,13 @@ exports.update = async (req, res, next) => {
 };
 exports.leaderboard = async (req, res, next) => {
   try {
-    const result = await User.findAll({
-      attributes: [
-        "uname", // Assuming your User model uses "uname" for the name field
-        [
-          Sequelize.fn(
-            "COALESCE",
-            Sequelize.fn("SUM", Sequelize.col("Expenses.amount")),
-            0
-          ),
-          "total_expense",
-        ],
-      ],
-      include: [
-        {
-          model: Expense,
-          attributes: [],
-        },
-      ],
-      group: ["User.id", "User.uname"],
-      order: [[Sequelize.literal("total_expense"), "DESC"]], // Order by total_expense descending
+    const users = await User.findAll({
+      attributes: ["uname", "total_expense"],
     });
-    res.json(result);
+    const sorted_users = users.sort((b, a) => {
+      b.total_expense - a.total_expense;
+    });
+    res.json(sorted_users);
   } catch (error) {
     console.error("Error in leaderboard:", error);
     res
