@@ -7,7 +7,7 @@ const jwt = require("jsonwebtoken");
 const paypal = require("@paypal/checkout-server-sdk");
 const qs = require("querystring");
 const axios = require("axios");
-// const sequelize = require("../util/database.js");
+const sequelize = require("../util/database.js"); //required for transaction
 // const Sequelize = require("sequelize");
 
 const environment = new paypal.core.SandboxEnvironment(
@@ -75,40 +75,44 @@ exports.login = async (req, res, next) => {
 function generateAccessToken(id, prime) {
   return jwt.sign({ user_id: id, prime: prime }, "secretkey");
 }
-// function decodeJWT(token) {
-//   // Split the token into header, payload, and signature
-//   const [headerB64, payloadB64, signature] = token.split('.');
-
-//   // Decode the payload
-//   const payload = JSON.parse(atob(payloadB64.replace(/-/g, '+').replace(/_/g, '/')));
-
-//   // Extract userid and name
-//   const { userid, prime } = payload;
-
-//   return { userid, prime};
-// }
 
 exports.add_expense = async (req, res, next) => {
+  const t = await sequelize.transaction();
   try {
     let msg = "";
     const expense = req.body;
     console.log("expense.........", expense);
-    const expense_added = await Expense.create({
-      amount: expense.amount,
-      category: expense.category,
-      description: expense.description,
-      userId: req.user.id,
-    });
-    await User.increment("total_expense", {
-      by: expense.amount,
-      where: { id: req.user.id },
-    });
+    const expense_added = await Expense.create(
+      {
+        amount: expense.amount,
+        category: expense.category,
+        description: expense.description,
+        userId: req.user.id,
+      },
+      { transaction: t }
+    );
+
+    const new_total_expense =
+      Number(expense.amount) + Number(req.user.total_expense);
+    await User.update(
+      { total_expense: new_total_expense },
+      {
+        where: { id: req.user.id },
+        transaction: t,
+      }
+    );
+    await t.commit();
     msg = "expense added succefully";
     const id = expense_added.id;
     const response = { msg, id };
     res.json(response);
   } catch (err) {
-    console.log(err);
+    await t.rollback();
+
+    console.error(err);
+    res
+      .status(500)
+      .json({ error: "An error occurred while adding the expense" });
   }
 };
 
@@ -127,17 +131,36 @@ exports.get_expenses = async (req, res) => {
 };
 
 exports.delete_expense = async (req, res) => {
+  const t = await sequelize.transaction();
   try {
     const id = req.params.id;
-    const expense = await Expense.destroy({
-      where: { id: id, userId: req.user.id },
-    });
-    await User.decrement("total_expense", {
-      by: expense.amount,
-      where: { id: req.user.id },
-    });
+    const expense_to_delete = await Expense.findOne(
+      {
+        where: { id: id, userId: req.user.id },
+      },
+      { transaction: t }
+    );
+
+    const expense = await Expense.destroy(
+      {
+        where: { id: id, userId: req.user.id },
+      },
+      { transaction: t }
+    );
+    console.log(expense_to_delete, "+++++++++++++++++++++++++");
+    const new_total_expense =
+      Number(req.user.total_expense) - Number(expense_to_delete.amount);
+    await User.update(
+      { total_expense: new_total_expense },
+      {
+        where: { id: req.user.id },
+      },
+      { transaction: t }
+    );
+    await t.commit();
     res.json({ success: true });
   } catch (err) {
+    await t.rollback();
     console.log(err);
   }
 };

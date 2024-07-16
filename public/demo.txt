@@ -28,6 +28,45 @@
 
 
 
+exports.add_expense = async (req, res, next) => {
+  // const t = await sequelize.transaction()
+  try {
+    let msg = "";
+    const expense = req.body;
+    console.log("expense.........", expense);
+    const expense_added = await Expense.create(
+      {
+        amount: expense.amount,
+        category: expense.category,
+        description: expense.description,
+        userId: req.user.id,
+      },
+      
+    );
+    await User.increment(
+      "total_expense",
+      {
+        by: expense.amount,
+        where: { id: req.user.id },
+      },
+      
+    );
+    // await t.commit();
+    msg = "expense added succefully";
+    const id = expense_added.id;
+    const response = { msg, id };
+    res.json(response);
+  } catch (err) {
+    // if (t) {
+    //   await t.rollback();
+    // }
+    console.error(err);
+    res
+      .status(500)
+      .json({ error: "An error occurred while adding the expense" });
+  }
+};
+
 
 
 
