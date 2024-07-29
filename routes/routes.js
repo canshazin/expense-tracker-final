@@ -7,6 +7,12 @@ const router = express.Router();
 
 router.post("/user/signup", controller.signup);
 router.post("/user/login", controller.login);
+router.post("/password/forgotpassword", controller.forgot_password);
+router.get("/password/resetpassword/:id", controller.reset_password);
+router.post(
+  "/password/resetpassword/updatepassword",
+  controller.update_password
+);
 router.post(
   "/expense/addexpense",
   middlewares.authenticate,

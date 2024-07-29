@@ -5,6 +5,7 @@ const sequelize = require("./util/database");
 const User = require("./models/user.js");
 const Expense = require("./models/expense.js");
 const Order = require("./models/order.js");
+const Password_Request = require("./models/forgot_password_requests.js");
 const path = require("path");
 require("dotenv").config();
 
@@ -19,6 +20,8 @@ User.hasMany(Expense);
 Expense.belongsTo(User);
 User.hasMany(Order);
 Order.belongsTo(User);
+User.hasMany(Password_Request);
+Password_Request.belongsTo(User);
 
 sequelize
   // .sync({ force: true })

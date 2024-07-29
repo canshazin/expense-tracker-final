@@ -32,3 +32,7 @@ login.addEventListener("submit", async (event) => {
       warning.innerHTML += `${err.response.data.message}`;
   }
 });
+function forgot_password(e) {
+  e.preventDefault();
+  window.location.href = "../forgotPassword/forgot_password.html";
+}
