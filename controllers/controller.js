@@ -230,8 +230,12 @@ exports.add_expense = async (req, res, next) => {
     let msg = "";
     const expense = req.body;
     console.log("expense.........", expense);
+
+    const date = new Date();
+
     const expense_added = await Expense.create(
       {
+        date: date,
         amount: expense.amount,
         category: expense.category,
         description: expense.description,

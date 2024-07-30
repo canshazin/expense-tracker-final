@@ -8,7 +8,14 @@ async function add_expense(e) {
   try {
     e.preventDefault();
     console.log(e);
+    const date = new Date();
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    const formattedDate = `${year}-${month}-${day}`;
+
     const expense_data = {
+      date: formattedDate,
       amount: e.target.amount.value,
       category: e.target.category.value,
       description: e.target.description.value,
@@ -34,14 +41,52 @@ async function add_expense(e) {
     console.log(err);
   }
 }
+
+// let lastDate = ""; // Global variable to keep track of the last date
+
 function add_to_ui(expense_data, id) {
   console.log(expense_data, "hiiiiiii", id);
-  const ul = document.querySelector("#expense_list");
-  ul.innerHTML += `<li >amount:${expense_data.amount} --- category: ${expense_data.category} --- description: ${expense_data.description}   <button onclick="delete_expense(event,${id})">delete</button></li>`;
+  const table = document.querySelector("#expense_list");
+
+  const date = new Date(expense_data.date);
+  console.log("date", date);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  const formattedDate = `${year}-${month}-${day}`;
+
+  // If the date has changed, insert an empty row
+  // if (formattedDate !== lastDate && lastDate !== "") {
+  //   const emptyRow = table.insertRow(-1);
+  //   emptyRow.insertCell(0).colSpan = 5; // Span all columns
+  //   emptyRow.style.height = "20px"; // Add some height to the empty row
+  // }
+
+  // Update lastDate
+  // lastDate = formattedDate.slice();
+
+  // Insert the actual data row
+  const newRow = table.insertRow(-1);
+  newRow.insertCell(0).textContent = formattedDate;
+  newRow.insertCell(1).textContent = expense_data.amount;
+  newRow.insertCell(2).textContent = expense_data.category;
+  newRow.insertCell(3).textContent = expense_data.description;
+  newRow.insertCell(
+    4
+  ).innerHTML = `<button onclick="delete_expense(event,${id})">delete</button>`;
+
+  // ul.innerHTML += `<li >Name:  ${expense_data.uname} ------------- Total Expense: ${expense_data.total_expense} `;
 }
-function add_to_ui_leaderboard(expense_data) {
-  const ul = document.querySelector("#leaderboard_list");
-  ul.innerHTML += `<li >Name:  ${expense_data.uname} ------------- Total Expense: ${expense_data.total_expense} `;
+
+function add_to_ui_leaderboard(expense_data, rank) {
+  const table = document.querySelector("#leaderboard_list");
+  table.style.visibility = "visible";
+  const newRow = table.insertRow(-1);
+  newRow.insertCell(0).textContent = rank;
+  newRow.insertCell(1).textContent = expense_data.uname;
+  newRow.insertCell(2).textContent = expense_data.total_expense;
+
+  // ul.innerHTML += `<li >Name:  ${expense_data.uname} ------------- Total Expense: ${expense_data.total_expense} `;
 }
 window.addEventListener("DOMContentLoaded", async () => {
   try {
@@ -55,6 +100,7 @@ window.addEventListener("DOMContentLoaded", async () => {
       document.querySelector("#premium_btn").style.visibility = "hidden";
       document.querySelector("#prime_div").innerHTML = "You are a prime user";
       document.querySelector("#leaderboard_btn").style.visibility = "visible";
+      document.querySelector("#view_report_btn").style.visibility = "visible";
     }
     expenses.data.expenses.forEach((expense) => {
       add_to_ui(expense, expense.id);
@@ -67,7 +113,7 @@ window.addEventListener("DOMContentLoaded", async () => {
 async function delete_expense(e, id) {
   try {
     e.preventDefault();
-    console.log(e.target.parentElement);
+    console.log(e.target.parentElement.parentElement);
     const deleted_expense = await axios.get(
       `${url}/expense/deleteexpense/${id}`,
       {
@@ -79,7 +125,7 @@ async function delete_expense(e, id) {
     if (deleted_expense.data.success === true) {
       console.log("deleted successfully");
     }
-    e.target.parentElement.remove();
+    e.target.parentElement.parentElement.remove();
   } catch (err) {
     console.log(err);
   }
@@ -174,6 +220,7 @@ async function buy_premium(e) {
         document.querySelector("#premium_btn").style.visibility = "hidden";
         document.querySelector("#prime_div").innerHTML = "You are a prime user";
         document.querySelector("#leaderboard_btn").style.visibility = "visible";
+        document.querySelector("#view_report_btn").style.visibility = "visible";
         // document.querySelector("#leaderboard_heading").style.visibility ="visible";
       } else if (paymentStatus === "cancelled") {
         alert("Transaction cancelled.");
@@ -190,7 +237,15 @@ async function show_leaderboard(e) {
   try {
     e.preventDefault();
     document.querySelector("#leaderboard_heading").style.visibility = "visible";
-    document.querySelector("#leaderboard_list").innerHTML = "";
+    document.querySelector("#leaderboard_list").style.visibility = "visible";
+
+    document.querySelector("#leaderboard_list").innerHTML = `<thead>
+        <tr>
+          <th>Rank</th>
+          <th>Name</th>
+          <th>Expense</th>
+        </tr>
+      </thead>`;
     const response = await axios.get(
       `${url}/premium/leaderboard`,
 
@@ -199,8 +254,10 @@ async function show_leaderboard(e) {
       }
     );
     console.log(response.data);
+    let rank = 1;
     response.data.forEach((expense) => {
-      add_to_ui_leaderboard(expense);
+      add_to_ui_leaderboard(expense, rank);
+      rank += 1;
     });
   } catch (err) {
     console.log(err);

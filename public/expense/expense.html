@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Document</title>
-    <!-- <link rel="stylesheet" href="login.css" /> -->
+    <link rel="stylesheet" href="expense.css" />
     <script src="https://www.paypal.com/sdk/js?client-id=AWdPOH7_TRxSdeVcjxmhWj6roxAPCiUEJyJLSewJfVlnmHkfMkzcPvgNF3fBrnG1pIoRAblORMNbqnba&currency=USD&intent=capture"></script>
   </head>
   <body>
@@ -22,7 +22,9 @@
       <input type="text" id="description" name="description" required />
       <button>Add Expense</button>
     </form>
+    <button id="premium_btn" onclick="buy_premium(event)">Buy Premium</button>
     <div id="prime_div"></div>
+    <button id="view_report_btn" onclick="view_report(event)"  style="visibility: hidden">View Report</button>
     <button
       id="leaderboard_btn"
       onclick="show_leaderboard(event)"
@@ -30,15 +32,34 @@
     >
       Show leaderboard
     </button>
-    <button id="premium_btn" onclick="buy_premium(event)">Buy Premium</button>
+
 
     <!-- <div id="warning"></div> -->
 
     <div id="paypal_button_container"></div>
     <h3>Expenses :</h3>
-    <ul id="expense_list"></ul>
+    <table id="expense_list">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Expense</th>
+          <th>Category</th>
+          <th>Description</th>
+          <th></th>
+          <!-- Empty header for 4th column -->
+        </tr>
+      </thead>
+    </table>
     <h3 id="leaderboard_heading" style="visibility: hidden">leaderBoard :</h3>
-    <ul id="leaderboard_list"></ul>
+    <table id="leaderboard_list" style="visibility: hidden">
+      <!-- <thead>
+        <tr>
+          <th>Rank</th>
+          <th>Name</th>
+          <th>Expense</th>
+        </tr>
+      </thead>
+    </table> -->
   </body>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.5.1/axios.min.js"></script>
   <script src="/expense/expense.js"></script>
