@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link rel="stylesheet" href="report.css" />
+    <script src="https://www.paypal.com/sdk/js?client-id=AWdPOH7_TRxSdeVcjxmhWj6roxAPCiUEJyJLSewJfVlnmHkfMkzcPvgNF3fBrnG1pIoRAblORMNbqnba&currency=USD&intent=capture"></script>
+  </head>
+  <body>
+    <form>
+      <input type="date" id="report_date" name="report_date" />
+      <button onclick="view_report(event)">Get Report</button>
+    </form>
+    <div id="expenses_list" style="visibility: hidden">
+      <h3>Daily Expense</h3>
+      <table id="daily">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Expense</th>
+            <th>Category</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+      </table>
+
+      <h3>Monthly Expense</h3>
+      <table id="monthly">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Expense</th>
+            <th>Category</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+      </table>
+
+      <h3>yearly Expense</h3>
+      <table id="yearly">
+        <thead>
+          <tr>
+            <th>Month</th>
+          </tr>
+        </thead>
+      </table>
+    </div>
+  </body>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.5.1/axios.min.js"></script>
+  <script src="/report/report.js"></script>
+</html>

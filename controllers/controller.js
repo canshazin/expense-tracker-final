@@ -11,6 +11,8 @@ const sequelize = require("../util/database.js"); //required for transaction
 // const Sequelize = require("sequelize");
 const Password_Request = require("../models/forgot_password_requests.js");
 const Sib = require("sib-api-v3-sdk");
+// const { Op } = require("sequelize");
+const { Op, Sequelize } = require("sequelize");
 
 const environment = new paypal.core.SandboxEnvironment(
   process.env.paypal_id,
@@ -426,6 +428,34 @@ exports.leaderboard = async (req, res, next) => {
     res
       .status(500)
       .json({ error: "An error occurred while fetching the leaderboard" });
+  }
+};
+
+exports.view_report = async (req, res, next) => {
+  const date = new Date(req.params.date);
+  const year = date.getFullYear();
+  if (req.user.isPrime == false) {
+    return res.status(404).json("not a prime user");
+  } else {
+    const expenses = await Expense.findAll(
+      {
+        attributes: ["date", "amount", "description", "category"],
+      },
+      {
+        where: {
+          userId: req.user.id,
+          date: {
+            [Op.and]: [
+              Sequelize.where(
+                Sequelize.fn("YEAR", Sequelize.col("date")),
+                year
+              ),
+            ],
+          },
+        },
+      }
+    );
+    res.json(expenses);
   }
 };
 

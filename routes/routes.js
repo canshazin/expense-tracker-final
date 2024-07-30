@@ -28,6 +28,13 @@ router.get(
   middlewares.authenticate,
   controller.leaderboard
 );
+
+router.get(
+  "/premium/report/view/:date",
+  middlewares.authenticate,
+  controller.view_report
+);
+
 router.get(
   "/expense/deleteexpense/:id",
   middlewares.authenticate,
