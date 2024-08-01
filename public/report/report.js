@@ -6,6 +6,23 @@ console.log("start of report script");
 async function view_report(e) {
   e.preventDefault();
   try {
+    const date_input = document.querySelector("#report_date");
+    let date_input_value = date_input.value;
+    console.log(date_input.value);
+    if (!date_input_value) {
+      date_input_value = new Date();
+    }
+    const response = await axios.get(
+      `${url}/premium/report/view/${date_input_value}`,
+      {
+        headers: {
+          Authorization: localStorage.getItem("token"),
+        },
+      }
+    );
+
+    document.querySelector("#expenses_list").style.visibility = "visible";
+
     document.querySelector("#daily").innerHTML = `<thead>
     <tr>
       <th>Date</th>
@@ -30,21 +47,7 @@ async function view_report(e) {
  
           </tr>
         </thead>`;
-    document.querySelector("#expenses_list").style.visibility = "visible";
-    const date_input = document.querySelector("#report_date");
-    let date_input_value = date_input.value;
-    console.log(date_input.value);
-    if (!date_input_value) {
-      date_input_value = new Date();
-    }
-    const response = await axios.get(
-      `${url}/premium/report/view/${date_input_value}`,
-      {
-        headers: {
-          Authorization: localStorage.getItem("token"),
-        },
-      }
-    );
+
     console.log(response.data);
     const date = new Date(date_input_value);
     const year = date.getFullYear();
@@ -140,7 +143,6 @@ async function view_report(e) {
     totalCell2.textContent = `Total Expense: Rs ${monthly_sum}`;
     console.log(monthly_sum_dictionary);
     for (const [key, value] of Object.entries(monthly_sum_dictionary)) {
-      console.log(key, "keeeeey");
       const obj = {
         month: monthDictionary[key],
         sum: monthly_sum_dictionary[key],
@@ -156,7 +158,11 @@ async function view_report(e) {
     totalCell3.textContent = `Total Expense: Rs ${year_sum}`;
   } catch (err) {
     console.log(err);
-    alert("smthing went wrong");
+    if (err.response.status == 401) {
+      alert("unauthorized action");
+    } else {
+      alert("smthing went wrong");
+    }
   }
 }
 

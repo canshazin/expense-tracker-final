@@ -8,6 +8,8 @@
     <script src="https://www.paypal.com/sdk/js?client-id=AWdPOH7_TRxSdeVcjxmhWj6roxAPCiUEJyJLSewJfVlnmHkfMkzcPvgNF3fBrnG1pIoRAblORMNbqnba&currency=USD&intent=capture"></script>
   </head>
   <body>
+    <div id="prime_div"></div>
+    <!-- <br> -->
     <form onsubmit="add_expense(event)">
       <label for="amount">Expense Amount : </label>
       <input type="number" id="amount" name="amount" required />
@@ -23,9 +25,18 @@
       <button>Add Expense</button>
     </form>
     <button id="premium_btn" onclick="buy_premium(event)">Buy Premium</button>
-    <div id="prime_div"></div>
-    <a href="../report/report.html">    <button id="view_report_btn"  style="visibility: hidden">View Report</button></a>
+    <!-- <br> -->
+    
+    <a href="../report/report.html" target="_blank">    <button id="view_report_btn"  style="visibility: hidden">View Report</button></a>
   </a>
+
+  <button
+      id="download_btn"
+      onclick="download_expenses(event)"
+      style="visibility: hidden"
+    >
+      Download Expenses
+    </button>
     <button
       id="leaderboard_btn"
       onclick="show_leaderboard(event)"
@@ -52,15 +63,12 @@
       </thead>
     </table>
     <h3 id="leaderboard_heading" style="visibility: hidden">leaderBoard :</h3>
+   
     <table id="leaderboard_list" style="visibility: hidden">
-      <!-- <thead>
-        <tr>
-          <th>Rank</th>
-          <th>Name</th>
-          <th>Expense</th>
-        </tr>
-      </thead>
-    </table> -->
+     </table>
+     <h3 id="download_list_heading" style="visibility: hidden;">Download History</h3>
+     <table id="download_list" style="visibility: hidden">
+    </table>
   </body>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.5.1/axios.min.js"></script>
   <script src="/expense/expense.js"></script>

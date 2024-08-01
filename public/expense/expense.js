@@ -33,9 +33,10 @@ async function add_expense(e) {
     console.log(response);
     const id = response.data.id;
     console.log(response.data.msg, id);
-    e.target.amount.value = "";
-    e.target.category.value = "";
-    e.target.description.value = "";
+    // e.target.amount.value = "";
+    // e.target.category.value = "";
+    // e.target.description.value = "";
+    e.target.reset();
     add_to_ui(expense_data, id);
   } catch (err) {
     console.log(err);
@@ -55,17 +56,6 @@ function add_to_ui(expense_data, id) {
   const day = String(date.getDate()).padStart(2, "0");
   const formattedDate = `${year}-${month}-${day}`;
 
-  // If the date has changed, insert an empty row
-  // if (formattedDate !== lastDate && lastDate !== "") {
-  //   const emptyRow = table.insertRow(-1);
-  //   emptyRow.insertCell(0).colSpan = 5; // Span all columns
-  //   emptyRow.style.height = "20px"; // Add some height to the empty row
-  // }
-
-  // Update lastDate
-  // lastDate = formattedDate.slice();
-
-  // Insert the actual data row
   const newRow = table.insertRow(-1);
   newRow.insertCell(0).textContent = formattedDate;
   newRow.insertCell(1).textContent = expense_data.amount;
@@ -88,6 +78,23 @@ function add_to_ui_leaderboard(expense_data, rank) {
 
   // ul.innerHTML += `<li >Name:  ${expense_data.uname} ------------- Total Expense: ${expense_data.total_expense} `;
 }
+
+function add_to_ui_download(data) {
+  const table = document.querySelector("#download_list");
+  document.querySelector("#download_list_heading").style.visibility = "visible";
+  table.style.visibility = "visible";
+
+  const date = new Date(data.date);
+  const offset = 5.5;
+  const india_date = new Date(date.getTime() + offset * 60 * 60 * 1000);
+
+  console.log(india_date.toISOString());
+  const newRow = table.insertRow(0);
+
+  newRow.insertCell(0).textContent = india_date.toISOString();
+  newRow.insertCell(1).textContent = data.url;
+}
+
 window.addEventListener("DOMContentLoaded", async () => {
   try {
     const expenses = await axios.get(`${url}/expense/getexpenses`, {
@@ -100,11 +107,28 @@ window.addEventListener("DOMContentLoaded", async () => {
       document.querySelector("#premium_btn").style.visibility = "hidden";
       document.querySelector("#prime_div").innerHTML = "You are a prime user";
       document.querySelector("#leaderboard_btn").style.visibility = "visible";
+      document.querySelector("#download_btn").style.visibility = "visible";
       document.querySelector("#view_report_btn").style.visibility = "visible";
     }
     expenses.data.expenses.forEach((expense) => {
       add_to_ui(expense, expense.id);
     });
+
+    //for download history
+    const downloads = await axios.get(`${url}/premium/download/history/get`, {
+      headers: {
+        Authorization: localStorage.getItem("token"),
+      },
+    });
+    console.log(downloads);
+    if (downloads.data.prime == true && downloads.data.data.length != 0) {
+      document.querySelector("#download_list").style.visibility = "visible";
+      document.querySelector("#download_list_heading").style.visibility =
+        "visible";
+      downloads.data.data.forEach((data) => {
+        add_to_ui_download(data);
+      });
+    }
   } catch (err) {
     console.log(err);
   }
@@ -220,6 +244,7 @@ async function buy_premium(e) {
         document.querySelector("#premium_btn").style.visibility = "hidden";
         document.querySelector("#prime_div").innerHTML = "You are a prime user";
         document.querySelector("#leaderboard_btn").style.visibility = "visible";
+        document.querySelector("#download_btn").style.visibility = "visible";
         document.querySelector("#view_report_btn").style.visibility = "visible";
         // document.querySelector("#leaderboard_heading").style.visibility ="visible";
       } else if (paymentStatus === "cancelled") {
@@ -236,6 +261,9 @@ async function buy_premium(e) {
 async function show_leaderboard(e) {
   try {
     e.preventDefault();
+    document
+      .querySelector("#leaderboard_list")
+      .scrollIntoView({ behavior: "smooth" });
     document.querySelector("#leaderboard_heading").style.visibility = "visible";
     document.querySelector("#leaderboard_list").style.visibility = "visible";
 
@@ -261,5 +289,50 @@ async function show_leaderboard(e) {
     });
   } catch (err) {
     console.log(err);
+  }
+}
+
+async function download_expenses(e) {
+  e.preventDefault();
+  try {
+    const response = await axios.get(`${url}/premium/download`, {
+      headers: {
+        Authorization: localStorage.getItem("token"),
+      },
+    });
+    console.log(response);
+    if (response.status == 200) {
+      var a = document.createElement("a");
+      a.href = response.data.file_url;
+      const file = await axios.post(
+        `${url}/premium/download/history/save`,
+        { date: response.data.file_date, url: response.data.file_url },
+        {
+          headers: {
+            Authorization: localStorage.getItem("token"),
+          },
+        }
+      );
+      console.log(file.data);
+      a.download = "myExpense.txt";
+      a.click();
+      const table = document.querySelector("#download_list");
+      table.style.visibility = "visible";
+      document.querySelector("#download_list_heading").style.visibility =
+        "visible";
+
+      const date = new Date(file.data.date);
+      const offset = 5.5;
+      const india_date = new Date(date.getTime() + offset * 60 * 60 * 1000);
+
+      console.log(india_date.toISOString());
+      const newRow = table.insertRow(0);
+
+      newRow.insertCell(0).textContent = india_date.toISOString();
+      newRow.insertCell(1).textContent = file.data.url;
+    }
+  } catch (err) {
+    console.log(err);
+    alert(err.message);
   }
 }

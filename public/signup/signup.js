@@ -9,7 +9,7 @@ const warning = document.querySelector("#warning");
 signup.addEventListener("submit", async (event) => {
   try {
     event.preventDefault();
-    warning.innerHTML = "";
+
     const user = {
       uname: user_name.value,
       email: user_email.value,
@@ -17,7 +17,7 @@ signup.addEventListener("submit", async (event) => {
     };
     const result = await axios.post(`${url}/user/signup`, user);
     console.log(result.data);
-    warning.innerHTML += result.data.msg;
+    alert(result.data.msg);
   } catch (err) {
     console.log(err);
   }

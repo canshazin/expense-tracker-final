@@ -36,6 +36,24 @@ router.get(
 );
 
 router.get(
+  "/premium/download",
+  middlewares.authenticate,
+  controller.download_expenses
+);
+
+router.post(
+  "/premium/download/history/save",
+  middlewares.authenticate,
+  controller.download_history_save
+);
+
+router.get(
+  "/premium/download/history/get",
+  middlewares.authenticate,
+  controller.download_history_get
+);
+
+router.get(
   "/expense/deleteexpense/:id",
   middlewares.authenticate,
   controller.delete_expense
