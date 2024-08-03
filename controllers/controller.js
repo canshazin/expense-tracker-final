@@ -275,15 +275,35 @@ exports.add_expense = async (req, res, next) => {
 
 exports.get_expenses = async (req, res) => {
   try {
-    let prime = false;
-    if (req.user.isPrime == true) {
-      prime = true;
-    }
+    const items_per_page = parseInt(req.query.items_per_page, 10) || 5; // Ensure it's a number
+    const page = parseInt(req.query.page, 10) || 1; // Ensure it's a number
 
-    const expenses = await Expense.findAll({ where: { userId: req.user.id } });
-    res.json({ expenses, prime: prime });
+    console.log(
+      page,
+      items_per_page,
+      "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"
+    );
+
+    let prime = req.user.isPrime || false;
+
+    const { count, rows: expenses } = await Expense.findAndCountAll({
+      where: { userId: req.user.id },
+      offset: (page - 1) * items_per_page,
+      limit: items_per_page,
+    });
+
+    res.json({
+      expenses,
+      prime,
+      current_page: page,
+      has_next_page: items_per_page * page < count,
+      next_page: items_per_page * page < count ? page + 1 : null,
+      has_previous_page: page > 1,
+      previous_page: page > 1 ? page - 1 : null,
+    });
   } catch (err) {
     console.log(err);
+    res.status(500).send("Server Error");
   }
 };
 

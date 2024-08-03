@@ -1,6 +1,9 @@
+// const { get_expenses } = require("../../controllers/controller");
+
 const url = "http://localhost:3000";
 console.log("start of expense script");
 const warning = document.querySelector("#warning");
+const pagination = document.querySelector("#pagination");
 
 // axios.defaults.headers.common["Authorization"] = localStorage.getItem("token"); for all request in this  to  have authorization header
 
@@ -95,33 +98,120 @@ function add_to_ui_download(data) {
   newRow.insertCell(1).textContent = data.url;
 }
 
+function show_pagination(data) {
+  console.log(data);
+  const current_page = data.current_page;
+  console.log(current_page);
+  const has_next_page = data.has_next_page;
+  const has_previous_page = data.has_previous_page;
+  const next_page = data.next_page;
+  const previous_page = data.previous_page;
+
+  document.querySelector("#pagination").innerHTML = "";
+  if (has_previous_page) {
+    const btn1 = document.createElement("button");
+    btn1.innerHTML = previous_page;
+    btn1.addEventListener("click", () => get_expenses(previous_page));
+    pagination.appendChild(btn1);
+  }
+  const btn2 = document.createElement("button");
+  console.log(current_page);
+  btn2.innerHTML = `<h3>${current_page}</h3>`;
+  btn2.addEventListener("click", () => get_expenses(current_page));
+  pagination.appendChild(btn2);
+  if (has_next_page) {
+    const btn3 = document.createElement("button");
+    btn3.innerHTML = next_page;
+    btn3.addEventListener("click", () => get_expenses(next_page));
+    pagination.appendChild(btn3);
+  }
+}
+
+async function get_expenses(page_no) {
+  try {
+    console.log("button clicked", page_no);
+    const page = page_no;
+    const page_limit = parseInt(localStorage.getItem("page_limit"), 10); // Ensure it's a number
+
+    const expenses = await axios.get(
+      `${url}/expense/getexpenses?page=${page}&items_per_page=${page_limit}`,
+      {
+        headers: {
+          Authorization: localStorage.getItem("token"),
+        },
+      }
+    );
+
+    document.querySelector("#expense_list").innerHTML = `<thead>
+      <tr>
+        <th>Date</th>
+        <th>Expense</th>
+        <th>Category</th>
+        <th>Description</th>
+        <th></th>
+      </tr>
+    </thead>`;
+
+    console.log(expenses);
+    expenses.data.expenses.forEach((expense) => {
+      add_to_ui(expense, expense.id);
+    });
+    show_pagination(expenses.data);
+  } catch (err) {
+    console.log(err);
+    alert("Something went wrong");
+  }
+}
+
 window.addEventListener("DOMContentLoaded", async () => {
   try {
-    const expenses = await axios.get(`${url}/expense/getexpenses`, {
-      headers: {
-        Authorization: localStorage.getItem("token"),
-      },
-    });
+    const page = 1;
+
+    let page_limit = parseInt(localStorage.getItem("page_limit"), 10) || 5;
+    localStorage.setItem("page_limit", page_limit); // Ensure it's a number
+
+    document.querySelector("#page_limit").value = page_limit; // Set the initial value
+
+    document
+      .querySelector("#page_limit")
+      .addEventListener("change", function () {
+        page_limit = parseInt(this.value, 10);
+        localStorage.setItem("page_limit", page_limit); // Update local storage
+        get_expenses(page); // Fetch expenses with updated page_limit
+      });
+
+    const expenses = await axios.get(
+      `${url}/expense/getexpenses?page=${page}&items_per_page=${page_limit}`,
+      {
+        headers: {
+          Authorization: localStorage.getItem("token"),
+        },
+      }
+    );
+
     console.log(expenses);
-    if (expenses.data.prime == true) {
+    if (expenses.data.prime) {
       document.querySelector("#premium_btn").style.visibility = "hidden";
       document.querySelector("#prime_div").innerHTML = "You are a prime user";
       document.querySelector("#leaderboard_btn").style.visibility = "visible";
       document.querySelector("#download_btn").style.visibility = "visible";
       document.querySelector("#view_report_btn").style.visibility = "visible";
     }
+
     expenses.data.expenses.forEach((expense) => {
       add_to_ui(expense, expense.id);
     });
 
-    //for download history
+    show_pagination(expenses.data);
+
+    // Fetch download history
     const downloads = await axios.get(`${url}/premium/download/history/get`, {
       headers: {
         Authorization: localStorage.getItem("token"),
       },
     });
     console.log(downloads);
-    if (downloads.data.prime == true && downloads.data.data.length != 0) {
+    if (downloads.data.prime && downloads.data.data.length != 0) {
       document.querySelector("#download_list").style.visibility = "visible";
       document.querySelector("#download_list_heading").style.visibility =
         "visible";

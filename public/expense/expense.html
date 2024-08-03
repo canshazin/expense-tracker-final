@@ -49,6 +49,15 @@
     <!-- <div id="warning"></div> -->
 
     <div id="paypal_button_container"></div>
+    <div id="expense_list_css">
+      <select id="page_limit" name="page_limit" >
+        <option value='5'>5</option>
+        <option value='10' >10</option>
+        <option value='20'>20</option>
+        <option value='30'>30</option>
+        <option value='50'>50</option>
+        <option value='100'>100</option>
+        </select>
     <h3>Expenses :</h3>
     <table id="expense_list">
       <thead>
@@ -62,6 +71,8 @@
         </tr>
       </thead>
     </table>
+    <div id="pagination"></div>
+  </div>
     <h3 id="leaderboard_heading" style="visibility: hidden">leaderBoard :</h3>
    
     <table id="leaderboard_list" style="visibility: hidden">
