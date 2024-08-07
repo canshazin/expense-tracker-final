@@ -46,8 +46,6 @@ async function add_expense(e) {
   }
 }
 
-// let lastDate = ""; // Global variable to keep track of the last date
-
 function add_to_ui(expense_data, id) {
   console.log(expense_data, "hiiiiiii", id);
   const table = document.querySelector("#expense_list");
@@ -59,7 +57,7 @@ function add_to_ui(expense_data, id) {
   const day = String(date.getDate()).padStart(2, "0");
   const formattedDate = `${year}-${month}-${day}`;
 
-  const newRow = table.insertRow(-1);
+  const newRow = table.insertRow(1);
   newRow.insertCell(0).textContent = formattedDate;
   newRow.insertCell(1).textContent = expense_data.amount;
   newRow.insertCell(2).textContent = expense_data.category;
@@ -248,6 +246,7 @@ async function delete_expense(e, id) {
 async function buy_premium(e) {
   try {
     e.preventDefault();
+    document.querySelector("#paypal_button_container").innerHTML = "";
     // const paypal_div = document.querySelector("#paypal_button_container");
     // paypal_div.innerHTML = "";
     let paymentStatus = "pending";
@@ -256,76 +255,92 @@ async function buy_premium(e) {
       headers: { Authorization: localStorage.getItem("token") },
     });
     const order_id = response.data.id;
+    async function set_up_paypal_button() {
+      return new Promise((resolve, reject) => {
+        paypal
+          .Buttons({
+            createOrder: async function () {
+              return order_id;
+            },
+            onApprove: async function (data, actions) {
+              console.log("Subscription approved:", data);
+              try {
+                const details = await actions.order.capture();
+                console.log(details);
+                const response = await axios.post(
+                  `${url}/purchase/premium-membership/update`,
+                  { flag: 1, payment_id: details.id, order_id: order_id },
+                  {
+                    headers: { Authorization: localStorage.getItem("token") },
+                  }
+                );
+                console.log(response.data.msg);
+                localStorage.setItem("token", response.data.token);
+                paymentStatus = "success";
+                resolve();
+              } catch (err) {
+                paymentStatus = "error";
+                reject(err);
+              }
+            },
+            onCancel: async function (data) {
+              console.log("Subscription cancelled:", data);
+              try {
+                const response = await axios.post(
+                  `${url}/purchase/premium-membership/update`,
+                  { flag: 2, payment_id: data.orderID, order_id: order_id },
+                  {
+                    headers: { Authorization: localStorage.getItem("token") },
+                  }
+                );
+                paymentStatus = "cancelled";
+                resolve();
+              } catch (err) {
+                paymentStatus = "error";
+                reject(err);
+              }
+            },
+            onError: async function (err) {
+              console.log("Subscription error:", err);
+              try {
+                const response = await axios.post(
+                  `${url}/purchase/premium-membership/update`,
+                  { flag: 3, payment_id: order_id, order_id: order_id },
+                  {
+                    headers: { Authorization: localStorage.getItem("token") },
+                  }
+                );
+                console.log(response.data);
+                paymentStatus = "error";
+                reject(err);
+              } catch (err) {
+                paymentStatus = "error";
+                reject(err);
+              }
+            },
+          })
+          .render("#paypal_button_container")
+          .catch((err) => {
+            paymentStatus = "error";
+            reject(err);
+          });
+      });
+    }
 
-    await paypal
-      .Buttons({
-        createOrder: async function () {
-          return order_id;
-        },
-        onApprove: async function (data, actions) {
-          console.log("Subscription approved:", data);
-          try {
-            const details = await actions.order.capture();
-            console.log(details);
-            const response = await axios.post(
-              `${url}/purchase/premium-membership/update`,
-              { flag: 1, payment_id: details.id, order_id: order_id },
-              {
-                headers: { Authorization: localStorage.getItem("token") },
-              }
-            );
-            console.log(response.data.msg);
-            localStorage.setItem("token", response.data.token);
-            paymentStatus = "success";
-            setTimeout(() => {
-              checkPaymentStatus();
-            }, 1000);
-            // Check status after approval
-          } catch (err) {
-            console.error("Error in onApprove:", err);
-            paymentStatus = "error";
-            checkPaymentStatus(); // Check status after error
-          }
-        },
-        onCancel: async function (data) {
-          console.log("Subscription cancelled:", data);
-          try {
-            const response = await axios.post(
-              `${url}/purchase/premium-membership/update`,
-              { flag: 2, payment_id: data.orderID, order_id: order_id },
-              {
-                headers: { Authorization: localStorage.getItem("token") },
-              }
-            );
-            paymentStatus = "cancelled";
-            checkPaymentStatus(); // Check status after cancellation
-          } catch (err) {
-            console.error("Error in onCancel:", err);
-            paymentStatus = "error";
-            checkPaymentStatus(); // Check status after error
-          }
-        },
-        onError: async function (err) {
-          console.log("Subscription error:", err);
-          try {
-            const response = await axios.post(
-              `${url}/purchase/premium-membership/update`,
-              { flag: 3, payment_id: order_id, order_id: order_id },
-              {
-                headers: { Authorization: localStorage.getItem("token") },
-              }
-            );
-            console.log(response.data);
-            paymentStatus = "error";
-            checkPaymentStatus(); // Check status after error
-          } catch (Err) {
-            console.error(Err);
-            paymentStatus = "error";
-            checkPaymentStatus(); // Check status after error
-          }
-        },
-      })
-      .render("#paypal_button_container");
+    async function handlePayPalTransaction() {
+      try {
+        await set_up_paypal_button();
+        console.log(paymentStatus);
+        checkPaymentStatus();
+      } catch (err) {
+        console.error("Error in PayPal transaction:", err);
+        paymentStatus = "error";
+        console.log(paymentStatus);
+        checkPaymentStatus();
+      }
+    }
+
+    handlePayPalTransaction();
 
     function checkPaymentStatus() {
       if (paymentStatus === "success") {

@@ -47,7 +47,7 @@ async function view_report(e) {
  
           </tr>
         </thead>`;
-
+    // console.log(response)
     console.log(response.data);
     const date = new Date(date_input_value);
     const year = date.getFullYear();

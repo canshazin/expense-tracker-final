@@ -1,33 +1,85 @@
+/* login.css */
+
+/* Basic resets and font settings */
 body {
   font-family: Arial, sans-serif;
-  padding: 20px;
+  margin: 0;
+  padding: 0;
+  background-color: #f0f0f0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
 }
 
-div {
-  background-color: #f2f2f2;
-  padding: 10px;
-  margin-bottom: 10px;
+form {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+  width: 300px;
+  margin-bottom: 20px;
 }
 
 label {
   display: block;
+  margin-bottom: 10px;
+  color: #333;
 }
+
+input[type="email"],
+input[type="password"] {
+  width: calc(100% - 20px);
+  padding: 8px;
+  margin-bottom: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
 button {
   background-color: #4caf50;
-  color: white;
-  padding: 8px 16px;
+  color: #fff;
   border: none;
-  border-radius: 8px;
+  padding: 10px;
   cursor: pointer;
-}
-#books > div {
-  background-color: #fdb6b6;
-}
-
-#booksReturned > div {
-  background-color: #fdb6b6;
+  border-radius: 4px;
+  width: 100%;
 }
 
-h3 {
+button:hover {
+  background-color: #45a049;
+}
+
+a {
+  display: block;
+  margin-top: 10px;
+  text-align: center;
+  color: #4caf50;
+  text-decoration: none;
+}
+
+a:hover {
+  color: #45a049;
+}
+
+#forgot_password_btn {
+  background-color: #f44336;
+  color: #fff;
+  border: none;
+  padding: 10px;
+  cursor: pointer;
+  border-radius: 4px;
+  width: 300px;
+  text-align: center;
+}
+
+#forgot_password_btn:hover {
+  background-color: #e53935;
+}
+
+#warning {
+  margin-top: 10px;
+  color: red;
   text-align: center;
 }

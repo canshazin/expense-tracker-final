@@ -50,15 +50,17 @@
 
     <div id="paypal_button_container"></div>
     <div id="expense_list_css">
-      <select id="page_limit" name="page_limit" >
-        <option value='5'>5</option>
-        <option value='10' >10</option>
-        <option value='20'>20</option>
-        <option value='30'>30</option>
-        <option value='50'>50</option>
-        <option value='100'>100</option>
-        </select>
+      
+   
     <h3>Expenses :</h3>
+    <select id="page_limit" name="page_limit" >
+      <option value='5'>5</option>
+      <option value='10' >10</option>
+      <option value='20'>20</option>
+      <option value='30'>30</option>
+      <option value='50'>50</option>
+      <option value='100'>100</option>
+    </select>
     <table id="expense_list">
       <thead>
         <tr>
@@ -77,9 +79,11 @@
    
     <table id="leaderboard_list" style="visibility: hidden">
      </table>
+     <div id="download_history">
      <h3 id="download_list_heading" style="visibility: hidden;">Download History</h3>
      <table id="download_list" style="visibility: hidden">
     </table>
+  </div>
   </body>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.5.1/axios.min.js"></script>
   <script src="/expense/expense.js"></script>
