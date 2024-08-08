@@ -1,11 +1,32 @@
-// const { get_expenses } = require("../../controllers/controller");
-
 const url = "http://localhost:3000";
 console.log("start of expense script");
 const warning = document.querySelector("#warning");
 const pagination = document.querySelector("#pagination");
 
 // axios.defaults.headers.common["Authorization"] = localStorage.getItem("token"); for all request in this  to  have authorization header
+document
+  .querySelector("#add_expense_form")
+  .addEventListener("submit", function (event) {
+    add_expense(event);
+  });
+
+document
+  .querySelector("#download_btn")
+  .addEventListener("click", function (event) {
+    download_expenses(event);
+  });
+
+document
+  .querySelector("#leaderboard_btn")
+  .addEventListener("click", function (event) {
+    show_leaderboard(event);
+  });
+
+document
+  .querySelector("#premium_btn")
+  .addEventListener("click", function (event) {
+    buy_premium(event);
+  });
 
 async function add_expense(e) {
   try {
@@ -23,7 +44,6 @@ async function add_expense(e) {
       category: e.target.category.value,
       description: e.target.description.value,
     };
-    console.log(expense_data);
     const response = await axios.post(
       `${url}/expense/addexpense`,
       expense_data,
@@ -33,12 +53,7 @@ async function add_expense(e) {
         },
       }
     );
-    console.log(response);
     const id = response.data.id;
-    console.log(response.data.msg, id);
-    // e.target.amount.value = "";
-    // e.target.category.value = "";
-    // e.target.description.value = "";
     e.target.reset();
     add_to_ui(expense_data, id);
   } catch (err) {
@@ -47,7 +62,6 @@ async function add_expense(e) {
 }
 
 function add_to_ui(expense_data, id) {
-  console.log(expense_data, "hiiiiiii", id);
   const table = document.querySelector("#expense_list");
 
   const date = new Date(expense_data.date);
@@ -57,7 +71,7 @@ function add_to_ui(expense_data, id) {
   const day = String(date.getDate()).padStart(2, "0");
   const formattedDate = `${year}-${month}-${day}`;
 
-  const newRow = table.insertRow(1);
+  const newRow = table.insertRow(-1);
   newRow.insertCell(0).textContent = formattedDate;
   newRow.insertCell(1).textContent = expense_data.amount;
   newRow.insertCell(2).textContent = expense_data.category;
@@ -65,8 +79,6 @@ function add_to_ui(expense_data, id) {
   newRow.insertCell(
     4
   ).innerHTML = `<button onclick="delete_expense(event,${id})">delete</button>`;
-
-  // ul.innerHTML += `<li >Name:  ${expense_data.uname} ------------- Total Expense: ${expense_data.total_expense} `;
 }
 
 function add_to_ui_leaderboard(expense_data, rank) {
@@ -76,8 +88,6 @@ function add_to_ui_leaderboard(expense_data, rank) {
   newRow.insertCell(0).textContent = rank;
   newRow.insertCell(1).textContent = expense_data.uname;
   newRow.insertCell(2).textContent = expense_data.total_expense;
-
-  // ul.innerHTML += `<li >Name:  ${expense_data.uname} ------------- Total Expense: ${expense_data.total_expense} `;
 }
 
 function add_to_ui_download(data) {
@@ -89,17 +99,13 @@ function add_to_ui_download(data) {
   const offset = 5.5;
   const india_date = new Date(date.getTime() + offset * 60 * 60 * 1000);
 
-  console.log(india_date.toISOString());
   const newRow = table.insertRow(0);
-
   newRow.insertCell(0).textContent = india_date.toISOString();
   newRow.insertCell(1).textContent = data.url;
 }
 
 function show_pagination(data) {
-  console.log(data);
   const current_page = data.current_page;
-  console.log(current_page);
   const has_next_page = data.has_next_page;
   const has_previous_page = data.has_previous_page;
   const next_page = data.next_page;
@@ -113,7 +119,6 @@ function show_pagination(data) {
     pagination.appendChild(btn1);
   }
   const btn2 = document.createElement("button");
-  console.log(current_page);
   btn2.innerHTML = `<h3>${current_page}</h3>`;
   btn2.addEventListener("click", () => get_expenses(current_page));
   pagination.appendChild(btn2);
@@ -127,7 +132,6 @@ function show_pagination(data) {
 
 async function get_expenses(page_no) {
   try {
-    console.log("button clicked", page_no);
     const page = page_no;
     const page_limit = parseInt(localStorage.getItem("page_limit"), 10); // Ensure it's a number
 
@@ -150,7 +154,6 @@ async function get_expenses(page_no) {
       </tr>
     </thead>`;
 
-    console.log(expenses);
     expenses.data.expenses.forEach((expense) => {
       add_to_ui(expense, expense.id);
     });
@@ -186,8 +189,6 @@ window.addEventListener("DOMContentLoaded", async () => {
         },
       }
     );
-
-    console.log(expenses);
     if (expenses.data.prime) {
       document.querySelector("#premium_btn").style.visibility = "hidden";
       document.querySelector("#prime_div").innerHTML = "You are a prime user";
@@ -208,7 +209,7 @@ window.addEventListener("DOMContentLoaded", async () => {
         Authorization: localStorage.getItem("token"),
       },
     });
-    console.log(downloads);
+
     if (downloads.data.prime && downloads.data.data.length != 0) {
       document.querySelector("#download_list").style.visibility = "visible";
       document.querySelector("#download_list_heading").style.visibility =
@@ -225,7 +226,6 @@ window.addEventListener("DOMContentLoaded", async () => {
 async function delete_expense(e, id) {
   try {
     e.preventDefault();
-    console.log(e.target.parentElement.parentElement);
     const deleted_expense = await axios.get(
       `${url}/expense/deleteexpense/${id}`,
       {
@@ -247,8 +247,6 @@ async function buy_premium(e) {
   try {
     e.preventDefault();
     document.querySelector("#paypal_button_container").innerHTML = "";
-    // const paypal_div = document.querySelector("#paypal_button_container");
-    // paypal_div.innerHTML = "";
     let paymentStatus = "pending";
 
     const response = await axios.get(`${url}/purchase/premium-membership`, {
@@ -351,7 +349,6 @@ async function buy_premium(e) {
         document.querySelector("#leaderboard_btn").style.visibility = "visible";
         document.querySelector("#download_btn").style.visibility = "visible";
         document.querySelector("#view_report_btn").style.visibility = "visible";
-        // document.querySelector("#leaderboard_heading").style.visibility ="visible";
       } else if (paymentStatus === "cancelled") {
         alert("Transaction cancelled.");
       } else if (paymentStatus === "error") {
@@ -386,7 +383,6 @@ async function show_leaderboard(e) {
         headers: { Authorization: localStorage.getItem("token") },
       }
     );
-    console.log(response.data);
     let rank = 1;
     response.data.forEach((expense) => {
       add_to_ui_leaderboard(expense, rank);
@@ -418,7 +414,6 @@ async function download_expenses(e) {
           },
         }
       );
-      console.log(file.data);
       a.download = "myExpense.txt";
       a.click();
       const table = document.querySelector("#download_list");
@@ -430,9 +425,7 @@ async function download_expenses(e) {
       const offset = 5.5;
       const india_date = new Date(date.getTime() + offset * 60 * 60 * 1000);
 
-      console.log(india_date.toISOString());
       const newRow = table.insertRow(0);
-
       newRow.insertCell(0).textContent = india_date.toISOString();
       newRow.insertCell(1).textContent = file.data.url;
     }

@@ -1,9 +1,11 @@
 console.log("start of password forgot script");
 const url = "http://localhost:3000";
 
-// const forgot_password_form = document.querySelector("#forgot_password");
-
-// const user_email = document.querySelector("#user_email");
+document
+  .querySelector("#forgot_password")
+  .addEventListener("submit", function (event) {
+    forgot_password(event);
+  });
 
 async function forgot_password(e) {
   try {

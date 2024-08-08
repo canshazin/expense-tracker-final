@@ -1,0 +1,76 @@
+import { add_expense, get_expenses, delete_expense } from "./expense.js";
+import { buy_premium, show_leaderboard, download_expenses } from "./premium.js";
+import { add_to_ui, add_to_ui_download, show_pagination } from "./ui.js";
+
+const url = "http://localhost:3000";
+const warning = document.querySelector("#warning");
+const pagination = document.querySelector("#pagination");
+
+window.addEventListener("DOMContentLoaded", async () => {
+  try {
+    const page = 1;
+
+    let page_limit = parseInt(localStorage.getItem("page_limit"), 10) || 5;
+    localStorage.setItem("page_limit", page_limit); // Ensure it's a number
+
+    document.querySelector("#page_limit").value = page_limit; // Set the initial value
+
+    document
+      .querySelector("#page_limit")
+      .addEventListener("change", function () {
+        page_limit = parseInt(this.value, 10);
+        localStorage.setItem("page_limit", page_limit); // Update local storage
+        get_expenses(page, page_limit); // Fetch expenses with updated page_limit
+      });
+
+    document
+      .querySelector("#expense_form")
+      .addEventListener("submit", add_expense);
+    document
+      .querySelector("#premium_btn")
+      .addEventListener("click", buy_premium);
+    document
+      .querySelector("#leaderboard_btn")
+      .addEventListener("click", show_leaderboard);
+    document
+      .querySelector("#download_btn")
+      .addEventListener("click", download_expenses);
+
+    const expenses = await get_expenses(page, page_limit);
+    console.log(expenses);
+
+    if (expenses.prime) {
+      document.querySelector("#premium_btn").style.visibility = "hidden";
+      document.querySelector("#prime_div").innerHTML = "You are a prime user";
+      document.querySelector("#leaderboard_btn").style.visibility = "visible";
+      document.querySelector("#download_btn").style.visibility = "visible";
+      document.querySelector("#view_report_btn").style.visibility = "visible";
+    }
+
+    expenses.expenses.forEach((expense) => {
+      add_to_ui(expense, expense.id);
+    });
+
+    show_pagination(expenses);
+
+    // Fetch download history
+    const downloads = await axios.get(`${url}/premium/download/history/get`, {
+      headers: {
+        Authorization: localStorage.getItem("token"),
+      },
+    });
+
+    if (downloads.data.prime && downloads.data.data.length !== 0) {
+      document.querySelector("#download_list").style.visibility = "visible";
+      document.querySelector("#download_list_heading").style.visibility =
+        "visible";
+      downloads.data.data.forEach((data) => {
+        add_to_ui_download(data);
+      });
+    }
+  } catch (err) {
+    console.log(err);
+  }
+});
+
+export { url, warning, pagination };

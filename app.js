@@ -1,3 +1,4 @@
+require("dotenv").config();
 const express = require("express");
 const bodyParser = require("body-parser");
 const routes = require("./routes/routes.js");
@@ -8,15 +9,16 @@ const Download = require("./models/download.js");
 const Order = require("./models/order.js");
 const Password_Request = require("./models/forgot_password_requests.js");
 const path = require("path");
-require("dotenv").config();
 
 var cors = require("cors");
 
 const app = express();
-app.use(express.static(path.join(__dirname, "public")));
+
 app.use(cors());
 app.use(bodyParser.json());
+app.use(express.static(path.join(__dirname, "public")));
 app.use(routes);
+
 User.hasMany(Expense);
 Expense.belongsTo(User);
 User.hasMany(Order);
@@ -30,7 +32,6 @@ sequelize
   // .sync({ force: true })
   .sync()
   .then((result) => {
-    // console.log(result);
     app.listen(3000);
   })
   .catch((err) => {

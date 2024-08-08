@@ -16,7 +16,7 @@ exports.purchase_premium = async (req, res, next) => {
   try {
     // Get access token
     const auth = Buffer.from(
-      `${process.env.PAYPAL_ID}:${PROCESS.ENV.PAYPAL_KEY}`
+      `${process.env.PAYPAL_ID}:${process.env.PAYPAL_KEY}`
     ).toString("base64");
     const tokenResponse = await axios({
       method: "post",

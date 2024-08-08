@@ -3,12 +3,16 @@ console.log("start of report script");
 
 // axios.defaults.headers.common["Authorization"] = localStorage.getItem("token"); for all request in this  to  have authorization header
 
+document
+  .querySelector("#view_report_btn")
+  .addEventListener("click", (event) => {
+    view_report(event);
+  });
 async function view_report(e) {
   e.preventDefault();
   try {
     const date_input = document.querySelector("#report_date");
     let date_input_value = date_input.value;
-    console.log(date_input.value);
     if (!date_input_value) {
       date_input_value = new Date();
     }
@@ -47,8 +51,7 @@ async function view_report(e) {
  
           </tr>
         </thead>`;
-    // console.log(response)
-    console.log(response.data);
+
     const date = new Date(date_input_value);
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, "0");

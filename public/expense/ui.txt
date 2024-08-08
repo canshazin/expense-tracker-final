@@ -1,0 +1,75 @@
+function add_to_ui(expense_data, id) {
+  const table = document.querySelector("#expense_list");
+
+  const date = new Date(expense_data.date);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  const formattedDate = `${year}-${month}-${day}`;
+
+  const newRow = table.insertRow(1);
+  newRow.insertCell(0).textContent = formattedDate;
+  newRow.insertCell(1).textContent = expense_data.amount;
+  newRow.insertCell(2).textContent = expense_data.category;
+  newRow.insertCell(3).textContent = expense_data.description;
+  newRow.insertCell(
+    4
+  ).innerHTML = `<button onclick="delete_expense(event,${id})">delete</button>`;
+}
+
+function add_to_ui_leaderboard(expense_data, rank) {
+  const table = document.querySelector("#leaderboard_list");
+  table.style.visibility = "visible";
+  const newRow = table.insertRow(-1);
+  newRow.insertCell(0).textContent = rank;
+  newRow.insertCell(1).textContent = expense_data.uname;
+  newRow.insertCell(2).textContent = expense_data.total_expense;
+}
+
+function add_to_ui_download(data) {
+  const table = document.querySelector("#download_list");
+  document.querySelector("#download_list_heading").style.visibility = "visible";
+  table.style.visibility = "visible";
+
+  const date = new Date(data.date);
+  const offset = 5.5;
+  const india_date = new Date(date.getTime() + offset * 60 * 60 * 1000);
+
+  const newRow = table.insertRow(0);
+  newRow.insertCell(0).textContent = india_date.toISOString();
+  newRow.insertCell(1).textContent = data.url;
+}
+
+function show_pagination(data) {
+  const current_page = data.current_page;
+  const has_next_page = data.has_next_page;
+  const has_previous_page = data.has_previous_page;
+  const next_page = data.next_page;
+  const previous_page = data.previous_page;
+
+  const pagination = document.querySelector("#pagination");
+  pagination.innerHTML = "";
+  if (has_previous_page) {
+    const btn1 = document.createElement("button");
+    btn1.innerHTML = previous_page;
+    btn1.addEventListener("click", () => get_expenses(previous_page));
+    pagination.appendChild(btn1);
+  }
+  const btn2 = document.createElement("button");
+  btn2.innerHTML = `<h3>${current_page}</h3>`;
+  btn2.addEventListener("click", () => get_expenses(current_page));
+  pagination.appendChild(btn2);
+  if (has_next_page) {
+    const btn3 = document.createElement("button");
+    btn3.innerHTML = next_page;
+    btn3.addEventListener("click", () => get_expenses(next_page));
+    pagination.appendChild(btn3);
+  }
+}
+
+export {
+  add_to_ui,
+  add_to_ui_leaderboard,
+  add_to_ui_download,
+  show_pagination,
+};

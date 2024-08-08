@@ -3,6 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
     <title>Document</title>
     <link rel="stylesheet" href="report.css" />
     <script src="https://www.paypal.com/sdk/js?client-id=AWdPOH7_TRxSdeVcjxmhWj6roxAPCiUEJyJLSewJfVlnmHkfMkzcPvgNF3fBrnG1pIoRAblORMNbqnba&currency=USD&intent=capture"></script>
@@ -10,7 +11,7 @@
   <body>
     <form>
       <input type="date" id="report_date" name="report_date" />
-      <button onclick="view_report(event)">Get Report</button>
+      <button id="view_report_btn">Get Report</button>
     </form>
     <div id="expenses_list" style="visibility: hidden">
       <div id="div1">

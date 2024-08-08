@@ -1,7 +1,7 @@
 const url = "http://localhost:3000";
 console.log("start of login script");
 const login = document.querySelector("#login");
-
+const forgot_password_btn = document.querySelector("#forgot_password_btn");
 const user_name = document.querySelector("#user_name");
 const user_email = document.querySelector("#user_email");
 const user_password = document.querySelector("#user_password");
@@ -20,8 +20,6 @@ login.addEventListener("submit", async (event) => {
       alert(`${result_data.message}`);
       console.log(result_data.token);
       localStorage.setItem("token", result_data.token);
-      // axios.defaults.headers.common["Authorization"] = result_data.token;
-
       window.location.href = "../expense/expense.html";
     } else {
       warning.innerHTML += `${result_data.message}`;
@@ -32,7 +30,7 @@ login.addEventListener("submit", async (event) => {
       warning.innerHTML += `${err.response.data.message}`;
   }
 });
-function forgot_password(e) {
-  e.preventDefault();
+forgot_password_btn.addEventListener("click", (event) => {
+  event.preventDefault();
   window.location.href = "../forgotPassword/forgot_password.html";
-}
+});

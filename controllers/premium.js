@@ -73,22 +73,17 @@ function format_expense(expenses) {
   expenses.forEach((expense) => {
     let padded_object_values = "";
     headers.forEach((header) => {
-      console.log(expense[header], "hi");
-      console.log(formatted_headers);
-      console.log(headers);
       const padded_value =
         expense[header].toString().padEnd(max_len, " ") + "|  ";
 
       padded_object_values += padded_value;
     });
     data.push(padded_object_values);
-    console.log(max_len);
   });
 
   //for heading separation from other rows
   const line = "-".repeat(formatted_headers.length);
   const result = [formatted_headers, line, ...data].join("\n");
-  console.log(result);
   return result;
 }
 
@@ -104,7 +99,6 @@ async function upload_tp_s3(data, file_name) {
     const s3 = new AWS.S3({
       accessKeyId: IAM_USER_ID,
       secretAccessKey: IAM_USER_KEY,
-      region: process.env.AWS_REGION, // Make sure to set the region
     });
 
     // Define upload parameters

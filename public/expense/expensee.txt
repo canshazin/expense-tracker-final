@@ -1,0 +1,88 @@
+import { url } from "./main.js";
+import { add_to_ui, show_pagination } from "./ui.js";
+
+async function add_expense(e) {
+  try {
+    e.preventDefault();
+    const date = new Date();
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    const formattedDate = `${year}-${month}-${day}`;
+
+    const expense_data = {
+      date: formattedDate,
+      amount: e.target.amount.value,
+      category: e.target.category.value,
+      description: e.target.description.value,
+    };
+    const response = await axios.post(
+      `${url}/expense/addexpense`,
+      expense_data,
+      {
+        headers: {
+          Authorization: localStorage.getItem("token"),
+        },
+      }
+    );
+    const id = response.data.id;
+    e.target.reset();
+    add_to_ui(expense_data, id);
+  } catch (err) {
+    console.log(err);
+  }
+}
+
+async function get_expenses(page, page_limit) {
+  try {
+    const expenses = await axios.get(
+      `${url}/expense/getexpenses?page=${page}&items_per_page=${page_limit}`,
+      {
+        headers: {
+          Authorization: localStorage.getItem("token"),
+        },
+      }
+    );
+
+    document.querySelector("#expense_list").innerHTML = `<thead>
+      <tr>
+        <th>Date</th>
+        <th>Expense</th>
+        <th>Category</th>
+        <th>Description</th>
+        <th></th>
+      </tr>
+    </thead>`;
+
+    expenses.data.expenses.forEach((expense) => {
+      add_to_ui(expense, expense.id);
+    });
+    show_pagination(expenses.data);
+    return expenses.data;
+  } catch (err) {
+    console.log(err);
+    alert("Something went wrong");
+  }
+}
+
+async function delete_expense(e, id) {
+  try {
+    e.preventDefault();
+    const deleted_expense = await axios.get(
+      `${url}/expense/deleteexpense/${id}`,
+      {
+        headers: {
+          Authorization: localStorage.getItem("token"),
+        },
+      }
+    );
+    if (deleted_expense.data.success === true) {
+      console.log("deleted successfully");
+    }
+    e.target.parentElement.parentElement.remove();
+  } catch (err) {
+    console.log(err);
+  }
+}
+
+export { add_expense, get_expenses, delete_expense };

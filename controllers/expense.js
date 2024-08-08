@@ -7,10 +7,7 @@ exports.add_expense = async (req, res, next) => {
   try {
     let msg = "";
     const expense = req.body;
-    console.log("expense.........", expense);
-
     const date = new Date();
-
     const expense_added = await Expense.create(
       {
         date: date,
