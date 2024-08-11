@@ -1,4 +1,4 @@
-const url = process.env.WEBSITE;
+const url = "http://13.60.96.121:3000";
 console.log("start of login script");
 const login = document.querySelector("#login");
 const forgot_password_btn = document.querySelector("#forgot_password_btn");

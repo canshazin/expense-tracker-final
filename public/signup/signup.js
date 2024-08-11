@@ -1,6 +1,5 @@
 console.log("start of signup script");
-const url = process.env.WEBSITE;
-
+const url = "http://13.60.96.121:3000";
 const signup = document.querySelector("#signup");
 const user_name = document.querySelector("#user_name");
 const user_email = document.querySelector("#user_email");

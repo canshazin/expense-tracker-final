@@ -1,5 +1,5 @@
 console.log("start of reset password script");
-const url = process.env.WEBSITE;
+const url = "http://13.60.96.121:3000";
 
 const reset_password_form = document.querySelector("#reset_password");
 
@@ -23,7 +23,7 @@ reset_password_form.addEventListener("submit", async (event) => {
       warning.innerHTML += result.data.msg;
     } else {
       alert("Password updated successfully");
-      window.location.href = `${process.env.WEBSITE}/login/login.html`;
+      window.location.href = `${url}/login/login.html`;
     }
   } catch (err) {
     console.log(err);
