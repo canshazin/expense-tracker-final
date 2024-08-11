@@ -1,5 +1,5 @@
 console.log("start of signup script");
-const url = "http://localhost:3000";
+const url = process.env.WEBSITE;
 
 const signup = document.querySelector("#signup");
 const user_name = document.querySelector("#user_name");

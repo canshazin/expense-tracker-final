@@ -42,9 +42,9 @@ exports.forgot_password = async (req, res, next) => {
           
           <body>
             <p>Click on the link below to reset your password:</p>
-            <a href="http://localhost:3000/password/resetpassword/${request.id}" class="button">Reset Password</a>
+            <a href="${process.env.WEBSITE}/password/resetpassword/${request.id}" class="button">Reset Password</a>
             <p>If the button above doesn't work, copy and paste this link into your browser:</p>
-            <p>http://localhost:3000/password/resetpassword/${request.id}</p>
+            <p>${process.env.WEBSITE}/password/resetpassword/${request.id}</p>
           </body>
         </html>
       `;

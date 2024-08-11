@@ -1,5 +1,5 @@
 console.log("start of password forgot script");
-const url = "http://localhost:3000";
+const url = process.env.WEBSITE;
 
 document
   .querySelector("#forgot_password")

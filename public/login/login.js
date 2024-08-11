@@ -1,4 +1,4 @@
-const url = "http://localhost:3000";
+const url = process.env.WEBSITE;
 console.log("start of login script");
 const login = document.querySelector("#login");
 const forgot_password_btn = document.querySelector("#forgot_password_btn");
