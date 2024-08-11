@@ -26,7 +26,7 @@ exports.forgot_password = async (req, res, next) => {
 
     const Client = Sib.ApiClient.instance;
     const apiKey = Client.authentications["api-key"];
-    apiKey.apiKey = process.env.brevo_key;
+    apiKey.apiKey = process.env.BREVO_KEY;
     const transEmailApi = new Sib.TransactionalEmailsApi();
 
     const sendSmtpEmail = new Sib.SendSmtpEmail();
