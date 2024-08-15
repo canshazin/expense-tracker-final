@@ -1,4 +1,4 @@
-const url = "http://13.60.96.121:3000";
+const url = "http://13.60.194.57:3000";
 console.log("start of expense script");
 const warning = document.querySelector("#warning");
 const pagination = document.querySelector("#pagination");
