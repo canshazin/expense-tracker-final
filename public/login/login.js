@@ -1,4 +1,4 @@
-const url = "http://13.60.194.57:3000";
+const url = "http://13.233.118.215:3000";
 console.log("start of login script");
 const login = document.querySelector("#login");
 const forgot_password_btn = document.querySelector("#forgot_password_btn");

@@ -1,4 +1,4 @@
-const url = "http://13.60.194.57:3000";
+const url = "http://13.233.118.215:3000";
 console.log("start of report script");
 
 // axios.defaults.headers.common["Authorization"] = localStorage.getItem("token"); for all request in this  to  have authorization header

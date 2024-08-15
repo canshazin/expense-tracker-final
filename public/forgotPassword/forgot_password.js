@@ -1,5 +1,5 @@
 console.log("start of password forgot script");
-const url = "http://13.60.194.57:3000";
+const url = "http://13.233.118.215:3000";
 
 document
   .querySelector("#forgot_password")
