@@ -10,8 +10,8 @@ exports.leaderboard = async (req, res, next) => {
     const users = await User.findAll({
       attributes: ["uname", "total_expense"],
     });
-    const sorted_users = users.sort((b, a) => {
-      b.total_expense - a.total_expense;
+    const sorted_users = users.sort((a, b) => {
+      return b.total_expense - a.total_expense;
     });
     res.json(sorted_users);
   } catch (error) {
@@ -87,35 +87,30 @@ function format_expense(expenses) {
   return result;
 }
 
-// Function to upload data to S3
 async function upload_tp_s3(data, file_name) {
   try {
-    // Load AWS credentials and configuration
     const BUCKET_NAME = process.env.BUCKET_NAME;
     const IAM_USER_ID = process.env.IAM_USER_ID;
     const IAM_USER_KEY = process.env.IAM_USER_KEY;
 
-    // Initialize S3 instance
     const s3 = new AWS.S3({
       accessKeyId: IAM_USER_ID,
       secretAccessKey: IAM_USER_KEY,
     });
 
-    // Define upload parameters
     const params = {
       Bucket: BUCKET_NAME,
       Key: file_name,
       Body: data,
-      ACL: "public-read", // Access Control List
+      ACL: "public-read",
     };
 
-    // Perform the upload operation and return the file url
     const result = await s3.upload(params).promise();
     console.log("Upload success:", result);
     return result.Location;
   } catch (err) {
     console.error("Error uploading to S3:", err);
-    throw err; // Re-throw the error for caller to handle
+    throw err;
   }
 }
 
@@ -125,7 +120,7 @@ exports.download_expenses = async (req, res, next) => {
     const expenses = await Expense.findAll({
       where: { userId: req.user.id },
       attributes: [
-        [literal("DATE(date)"), "date"], // Format date to exclude time
+        [literal("DATE(date)"), "date"],
         "amount",
         "description",
         "category",

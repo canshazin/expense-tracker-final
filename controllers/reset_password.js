@@ -1,7 +1,7 @@
 const User = require("../models/user.js");
 const path = require("path");
 const bcrypt = require("bcrypt");
-const sequelize = require("../util/database.js"); //required for transaction
+const sequelize = require("../util/database.js");
 const Password_Request = require("../models/forgot_password_requests.js");
 const Sib = require("sib-api-v3-sdk");
 
@@ -16,13 +16,11 @@ exports.forgot_password = async (req, res, next) => {
       response.message = "E-mail doesnt exist";
       return res.status(404).json(response);
     }
-    console.log(exist_email);
 
     const request = await Password_Request.create({
       userId: exist_email.id,
       isActive: true,
     });
-    console.log("REQUEST", request.id, "REQUEST");
 
     const Client = Sib.ApiClient.instance;
     const apiKey = Client.authentications["api-key"];

@@ -1,16 +1,16 @@
 const User = require("../models/user.js");
 const Expense = require("../models/expense.js");
-const sequelize = require("../util/database.js"); //required for transaction
+const sequelize = require("../util/database.js");
 
 exports.add_expense = async (req, res, next) => {
   const t = await sequelize.transaction();
   try {
     let msg = "";
     const expense = req.body;
-    const date = new Date();
+
     const expense_added = await Expense.create(
       {
-        date: date,
+        date: expense.date,
         amount: expense.amount,
         category: expense.category,
         description: expense.description,
@@ -31,6 +31,7 @@ exports.add_expense = async (req, res, next) => {
     await t.commit();
     msg = "expense added succefully";
     const id = expense_added.id;
+
     const response = { msg, id };
     res.json(response);
   } catch (err) {
@@ -45,8 +46,8 @@ exports.add_expense = async (req, res, next) => {
 
 exports.get_expenses = async (req, res) => {
   try {
-    const items_per_page = parseInt(req.query.items_per_page, 10) || 5; // Ensure it's a number
-    const page = parseInt(req.query.page, 10) || 1; // Ensure it's a number
+    const items_per_page = parseInt(req.query.items_per_page, 10) || 5;
+    const page = parseInt(req.query.page, 10) || 1;
     let prime = req.user.isPrime || false;
     const { count, rows: expenses } = await Expense.findAndCountAll({
       where: { userId: req.user.id },

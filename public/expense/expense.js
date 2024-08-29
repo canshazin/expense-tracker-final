@@ -1,4 +1,4 @@
-const url = "http://13.233.118.215:3000";
+const url = "http://localhost:3000";
 console.log("start of expense script");
 const warning = document.querySelector("#warning");
 const pagination = document.querySelector("#pagination");
@@ -31,15 +31,9 @@ document
 async function add_expense(e) {
   try {
     e.preventDefault();
-    console.log(e);
-    const date = new Date();
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-    const formattedDate = `${year}-${month}-${day}`;
 
     const expense_data = {
-      date: formattedDate,
+      date: new Date(),
       amount: e.target.amount.value,
       category: e.target.category.value,
       description: e.target.description.value,
@@ -83,7 +77,7 @@ function add_to_ui(expense_data, id) {
 
 function add_to_ui_leaderboard(expense_data, rank) {
   const table = document.querySelector("#leaderboard_list");
-  table.style.visibility = "visible";
+
   const newRow = table.insertRow(-1);
   newRow.insertCell(0).textContent = rank;
   newRow.insertCell(1).textContent = expense_data.uname;
@@ -92,8 +86,8 @@ function add_to_ui_leaderboard(expense_data, rank) {
 
 function add_to_ui_download(data) {
   const table = document.querySelector("#download_list");
-  document.querySelector("#download_list_heading").style.visibility = "visible";
-  table.style.visibility = "visible";
+  // document.querySelector("#download_list_heading").style.visibility = "visible";
+  // table.style.visibility = "visible";
 
   const date = new Date(data.date);
   const offset = 5.5;
@@ -133,7 +127,7 @@ function show_pagination(data) {
 async function get_expenses(page_no) {
   try {
     const page = page_no;
-    const page_limit = parseInt(localStorage.getItem("page_limit"), 10); // Ensure it's a number
+    const page_limit = parseInt(localStorage.getItem("page_limit"), 10);
 
     const expenses = await axios.get(
       `${url}/expense/getexpenses?page=${page}&items_per_page=${page_limit}`,
@@ -169,9 +163,9 @@ window.addEventListener("DOMContentLoaded", async () => {
     const page = 1;
 
     let page_limit = parseInt(localStorage.getItem("page_limit"), 10) || 5;
-    localStorage.setItem("page_limit", page_limit); // Ensure it's a number
+    localStorage.setItem("page_limit", page_limit);
 
-    document.querySelector("#page_limit").value = page_limit; // Set the initial value
+    document.querySelector("#page_limit").value = page_limit;
 
     document
       .querySelector("#page_limit")
@@ -189,6 +183,7 @@ window.addEventListener("DOMContentLoaded", async () => {
         },
       }
     );
+
     if (expenses.data.prime) {
       document.querySelector("#premium_btn").style.visibility = "hidden";
       document.querySelector("#prime_div").innerHTML = "You are a prime user";
@@ -328,7 +323,6 @@ async function buy_premium(e) {
     async function handlePayPalTransaction() {
       try {
         await set_up_paypal_button();
-        console.log(paymentStatus);
         checkPaymentStatus();
       } catch (err) {
         console.error("Error in PayPal transaction:", err);
@@ -416,18 +410,12 @@ async function download_expenses(e) {
       );
       a.download = "myExpense.txt";
       a.click();
+
       const table = document.querySelector("#download_list");
       table.style.visibility = "visible";
       document.querySelector("#download_list_heading").style.visibility =
         "visible";
-
-      const date = new Date(file.data.date);
-      const offset = 5.5;
-      const india_date = new Date(date.getTime() + offset * 60 * 60 * 1000);
-
-      const newRow = table.insertRow(0);
-      newRow.insertCell(0).textContent = india_date.toISOString();
-      newRow.insertCell(1).textContent = file.data.url;
+      add_to_ui_download(file.data);
     }
   } catch (err) {
     console.log(err);

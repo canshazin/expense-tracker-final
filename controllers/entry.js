@@ -11,7 +11,7 @@ exports.signup = async (req, res, next) => {
     const user = req.body;
     const exist_email = await User.findAll({ where: { email: user.email } });
     if (exist_email.length > 0) {
-      res.json({ success: true, msg: "email already taken" });
+      res.json({ success: false, msg: "email already taken" });
     } else {
       bcrypt.hash(user.password, 10, async (err, hash) => {
         console.log(err);
